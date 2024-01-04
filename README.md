@@ -2,7 +2,7 @@ Here is an example of calculating heat diffusion by using the graph approach.
 
 In the repository are gifs that display the heat diffusion process in 4 example cases. They are displayed as grids for the simplicity of visualization.
 
-To create your own example, create a black and white image with the size 100x100 pixels. The black pixels will not be included in the graph, meaning that the temperature can not diffuse through them. Add the image to the same folder and edit the image name in parameters.py. Then edit parameters in parameters.py however you desire and run heat_diffusion_simpler.py and a gif will be save to display the process.
+To create your own example, create a black and white image with the size 100x100 pixels. The black pixels will not be included in the graph, meaning that the temperature can not diffuse through them. Add the image to the same folder and edit the image name in parameters.py. Then edit parameters in parameters.py however you desire and run heat_diffusion_simpler.py and a gif will be saved to display the process.
 
 
 Here are some examples:
