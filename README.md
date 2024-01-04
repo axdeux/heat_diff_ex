@@ -8,18 +8,29 @@ To create your own example, create a black and white image with the size 100x100
 Here are some examples:
 
 Coffee in a perfect cup: 
+
 ![](./gifs/coffee.gif)
+
 Initial coffee temperature is 90 and environment temperature is 1.
 
 
+
 Office heater:
+
 ![](./gifs/office.gif)
+
 Heater has a constant temperature of 30 and environment is 1.
 
+
 Candle:
+
 ![](./gifs/candle.gif)
+
 Candle fire has a constant temperature of 500 and environment is 1.
 
+
 Abstract art:
+
 ![](./gifs/abstract.gif)
+
 Initial temperature is 30 and environment is 1.
