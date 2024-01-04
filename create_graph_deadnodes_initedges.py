@@ -3,8 +3,8 @@ import torch
 from generate_grid_graph import generate_grid_graph
 
 
-def create_graph(N, M, dead_nodes=0):
-    basic_grid_graph = generate_grid_graph(np.zeros((N, M))+10e-10)
+def create_graph(N, M, dead_nodes=0, init_temp=10e-10):
+    basic_grid_graph = generate_grid_graph(np.zeros((N, M))+init_temp)
     basic_grid_graph.dead_nodes = np.array([])
     basic_grid_graph.grid_mask = np.ones((N, M))*np.nan
     basic_grid_graph.grid_shape = (N, M)

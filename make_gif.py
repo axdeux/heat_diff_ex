@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-def make_gif(matrices, mask, max_temp=1, path="heat/", save_name="temp"):
+def make_gif(matrices, mask, min_temp=0, max_temp=1, path="heat/", save_name="temp"):
     # print("----------Making gif----------")
     # Open image and read from numpy array
     time_steps = matrices.shape[0]
     
     fig, ax = plt.subplots()
-    im = ax.imshow(matrices[0, :, :], vmin=0, vmax=max_temp, animated=True)
+    im = ax.imshow(matrices[0, :, :], vmin=min_temp, vmax=max_temp, animated=True, cmap="YlOrRd")
     ax.imshow(mask, cmap="gray", alpha=1)
     fig.colorbar(im, ax=ax, label="Temperature (K)")
 

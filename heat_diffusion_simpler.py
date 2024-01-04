@@ -6,6 +6,7 @@ from make_gif import make_gif
 from create_graph_deadnodes_initedges import create_graph
 from PIL import Image
 import torch
+import parameters as par
 
 def get_laplacian(graph):
     # Get the adjecency matrix from edges
@@ -24,7 +25,7 @@ def get_laplacian(graph):
     return laplacian
 
 
-def heat_diffusion(graph, timesteps=20, dt=0.1, alpha=0.5, save_path=None, save_name=None, gif=True):
+def heat_diffusion(graph, timesteps=20, dt=0.1, alpha=0.5, save_path=None, save_name=None, gif=True, heatmap=None):
     laplacian = get_laplacian(graph)
     temperature_matrix = graph.x.numpy().copy()
     
@@ -39,12 +40,16 @@ def heat_diffusion(graph, timesteps=20, dt=0.1, alpha=0.5, save_path=None, save_
     for t in tqdm(range(1, timesteps)):
         # Heat diffusion
         temperature_matrix = temperature_matrix + gamma*laplacian.dot(temperature_matrix)
+        if heatmap is not None:
+                temperature_matrix[heatmap[0]] = heatmap[1]
         matrix_list[t] = temperature_matrix.reshape(graph.grid_shape)
 
-    make_gif(matrix_list, graph.grid_mask, max_temp=1, path=save_path, save_name=save_name)    #Make gif of the diffusion
+    #extra step is to store graphs for each timestep
+        
+    make_gif(matrix_list, graph.grid_mask, min_temp=par.min_gif_cmap_temp, max_temp=par.max_gif_cmap_temp, path=save_path, save_name=save_name)    #Make gif of the diffusion
 
 
-def create_heat_graph(image):
+def create_heat_graph(image, heatmap=False):
     im_frame = Image.open(image+'.png')
     np_frame = np.array(im_frame.getdata())[:, 0]
     np_frame = np_frame/255
@@ -63,7 +68,7 @@ def create_heat_graph(image):
     # flatten dead_nodes indices
     dead_nodes_int = np.ravel_multi_index(dead_nodes.T, (N, M))
 
-    init_graph = create_graph(N, M, dead_nodes=0)
+    init_graph = create_graph(N, M, dead_nodes=0, init_temp=par.base_graph_temp)
     edge_indices = init_graph.edge_index.numpy().copy().T
 
     for i in dead_nodes_int:
@@ -81,16 +86,33 @@ def create_heat_graph(image):
     init_graph.grid_mask = np_frame
 
     temperature_grid = np.zeros((N, M))
-    for i in range(40, 46):
-        for j in range(50, 61):
-            temperature_grid[i, j] = 20
+    
+    heat_source = None
+    if heatmap:
+        temperature_grid = temperature_grid.flatten()
+        heat_frame = Image.open(image+'_heat.png')
+        heat_frame = np.array(heat_frame.getdata())[:, 0]
+        heat_frame = heat_frame/255
+        heat_source = np.where(heat_frame == 0)[0]
 
-    init_graph.x = torch.tensor(temperature_grid).reshape(-1, 1).float()
+        temperature_grid[heat_source] = par.hotspot_temp
+    else:
+        #custom heat source
+        for i in range(40, 46):
+            for j in range(50, 61):
+                temperature_grid[i, j] = par.hotspot_temp
+        temperature_grid = temperature_grid.flatten()
+    
+    
+    init_graph.x = torch.tensor(temperature_grid).float()
 
-    return init_graph
+    return init_graph, heat_source
 
 
-image_name = "abstract"
-heat_graph = create_heat_graph(image_name)
 
-heat_diffusion(heat_graph, timesteps=500, dt=0.5, alpha=0.5, save_path="gifs/", save_name=image_name)
+heat_graph, heat_source = create_heat_graph(par.image_name, heatmap=par.heatmap)
+
+if par.continous_heat:
+    heat_diffusion(heat_graph, timesteps=par.total_time, dt=par.dt, alpha=par.alpha, save_path="gifs/", save_name=par.image_name, heatmap=(heat_source, par.hotspot_temp))
+else:
+    heat_diffusion(heat_graph, timesteps=par.total_time, dt=par.dt, alpha=par.alpha, save_path="gifs/", save_name=par.image_name)
